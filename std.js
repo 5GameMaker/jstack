@@ -1,4 +1,4 @@
-const { func, take, extern, end, pop, call, dup } = require('.');
+const { func, take, extern, end, pop, call, dup, store } = require('.');
 
 /**
  * JStack utility library.
@@ -97,6 +97,11 @@ const objects = [
         pop`obj`, pop`fn`, call`get`,
         pop`obj`, call`!js.bind`,
         pop`argc`, call`call`,
+    end, end,
+    func`applym`, take`obj fn argc`,
+        pop`obj`, dup, store`temp`,
+        pop`fn`, pop`argc`, call`callm`,
+        pop, pop`temp`,
     end, end,
 ];
 

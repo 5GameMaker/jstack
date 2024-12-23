@@ -84,7 +84,11 @@ function jstack(program, debug = () => void 0) {
 
     const ctx = mkctx(debug, program, stack, scopes, [0]);
 
-    return execute(ctx);
+    try {
+        return execute(ctx);
+    } catch (why) {
+        raise(ctx, why);
+    }
 }
 
 function execute(ctx) {

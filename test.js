@@ -1,75 +1,86 @@
+const { jstack, call, end, extern, func, pop, take, loop, store, mut, dup } = require(".");
 const assert = require("node:assert");
-const { call, end, extern, jstack, func, pop, take, loop, store, mut, dup } = require(".");
 const std = require("./std");
 const EventEmitter = require("node:events");
 
-console.log("! TEST 1 !");
-assert(jstack([
-    (a, b) => a + b, 2, extern`add`,
-
-    func`do`,
-        ...jstack([ // fanciest const fn
-            ...std.objects,
-            -1, 4, call`add`,
-        ]),
-        take`x y z`, // 1, 2, 3
-            pop`x`,
-            pop`z`,
-            call`add`,
-            pop`y`,
-            call`add`,
-        end,
-    end,
-
-    1, 2,
-
-    call`do`,
-])[0] == 6, "test 1 failed");
-
-console.log("! TEST 2 !");
-assert(jstack([
-    ...std,
-
-    1, 2, 3,
-    (a, b, c) => a == 1 && b == 2 && c == 3,
-    3, call`call`,
-])[0] === true, "test 2 failed");
-
-console.log("! TEST 3 !");
-assert(jstack([
-    ...std.objects,
-
-    [],
-    3, store`i`,
-    loop,   pop`i`,
-            1, call`sub`,
-            dup, mut`i`,
-            0, call`gq`,
-        end,
-
-        take`arr`, pop`arr`,
-            pop`i`, pop`arr`, 'push', 1, call`callm`, pop,
-        end,
-    end,
-])[0].length == 3, "test 3 failed");
-
-console.log("! TEST 4 !");
-const handler = new EventEmitter();
 jstack([
     ...std,
 
-    handler,
+    (test, val, msg) => assert(test === val, msg), 3, extern`assert_eq`,
+    jstack, 1, extern`eval`,
 
-    func, call`arrayof`,
-        0, call`get`,
-        call`log`,
-    end,
+    "! TEST 1 !", call`log`,
+    [
+        (a, b) => a + b, 2, extern`add`,
 
-    take`hdl fn`,
-        "hello", pop`fn`, pop`hdl`, "on", 2, call`callm`,
+        func`do`,
+            ...jstack([ // fanciest const fn
+                ...std.objects,
+                -1, 4, call`add`,
+            ]),
+            take`x y z`, // 1, 2, 3
+                pop`x`,
+                pop`z`,
+                call`add`,
+                pop`y`,
+                call`add`,
+            end,
+        end,
+
+        1, 2,
+
+        call`do`,
+    ], call`eval`, 0, call`get`, 6,
+    "test 1 failed", call`assert_eq`,
+
+    "! TEST 2 !", call`log`,
+    [
+        ...std,
+
+        1, 2, 3,
+        (a, b, c) => a == 1 && b == 2 && c == 3,
+        3, call`call`,
+    ], call`eval`, 0, call`get`, true,
+    "test 2 failed", call`assert_eq`,
+
+    "! TEST 3 !", call`log`,
+    [
+        ...std.objects,
+        ...std.util,
+
+        [],
+        3, store`i`,
+        loop,   pop`i`,
+                1, call`sub`,
+                dup, mut`i`,
+                0, call`gq`,
+            end,
+
+            pop`i`, call`swap`, 'push', 1, call`applym`,
+        end,
+    ], call`eval`, 0, call`get`, call`len`, 3,
+    "test 3 failed", call`assert_eq`,
+
+    "! TEST 4 !", call`log`,
+    () => new EventEmitter(), 0, call`call`, dup,
+    [
+        ...std,
+
+        func, call`arrayof`,
+            0, call`get`,
+            call`log`,
+        end,
+
+        take`hdl fn`,
+            "hello", pop`fn`, pop`hdl`, "on", 2, call`callm`,
+        end,
+    ],
+    "unshift", 1, call`applym`,
+    call`eval`, pop,
+
+    take`emit`,
+        "hello", "Heyyy!", pop`emit`, "emit", 2, call`callm`, pop,
+        "hello", "Message 2", pop`emit`, "emit", 2, call`callm`, pop,
+        "hello", "Message 3", pop`emit`, "emit", 2, call`callm`, pop,
     end,
 ]);
-
-handler.emit("hello", "Heyyy!");
-handler.emit("hello", "Message 2");
-handler.emit("hello", "Message 3");

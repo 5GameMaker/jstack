@@ -80,3 +80,6 @@ Perform an operation.
 `<...argv: any[]> <fn: function> <argc: number> call -> any`  
 `<...argv: any[]> <this: any> <fn: PropertyName> <argc: number> callm -> any`  
 Call a function.
+
+`<...argv: any[]> <this: any> <fn: PropertyName> <argc: number> applym -> any`  
+Call a function and return `this`.
