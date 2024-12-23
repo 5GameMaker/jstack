@@ -1,0 +1,11 @@
+on: [push, pull_request]
+name: Run tests
+jobs:
+  clippy_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v4.1.0
+        with:
+          node-version: 23.x
+      - run: npm test
